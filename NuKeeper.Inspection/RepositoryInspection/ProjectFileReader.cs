@@ -82,9 +82,9 @@ namespace NuKeeper.Inspection.RepositoryInspection
                 .ToList();
 
             var packageRefs = itemGroups
-                .SelectMany(ig => ig.Elements(ns + "PackageReference"))
+                .SelectMany(ig => ig.Elements(ns + "PackageReference"));
+            var globalPackageRefs = itemGroups.SelectMany(ig => ig.Elements(ns + "GlobalPackageReference"))
                 .Concat(itemGroups.SelectMany(ig => ig.Elements(ns + "PackageDownload")));
-            var globalPackageRefs = itemGroups.SelectMany(ig => ig.Elements(ns + "GlobalPackageReference"));
 
             results.AddRange(packageRefs
                 .Select(el => XmlToPackage(ns, el, path, projectRefs))
