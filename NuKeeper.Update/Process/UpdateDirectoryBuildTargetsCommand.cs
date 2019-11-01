@@ -48,20 +48,33 @@ namespace NuKeeper.Update.Process
 
             var packagesNodes = project.Elements("ItemGroup");
             var sdkNodes = project.Elements("Sdk");
-            var packageNodeList = packagesNodes.Elements("PackageReference")
+            var packageReferenceList = packagesNodes.Elements("PackageReference")
                 .Concat(packagesNodes.Elements("GlobalPackageReference"))
                 .Where(x =>
                     (x.Attributes("Include").Any(a => a.Value.Equals(currentPackage.Id, StringComparison.InvariantCultureIgnoreCase))
                   || x.Attributes("Update").Any(a => a.Value.Equals(currentPackage.Id, StringComparison.InvariantCultureIgnoreCase))));
-            var sdkNodeList = sdkNodes
-                .Where(x => x.Attributes("Name").Any(a => a.Value.Equals(currentPackage.Id, StringComparison.InvariantCultureIgnoreCase)));
 
-            foreach (var dependencyToUpdate in packageNodeList)
+            foreach (var dependencyToUpdate in packageReferenceList)
             {
                 _logger.Detailed(
                     $"Updating directory-level dependencies: {currentPackage.Id} in path {currentPackage.Path.FullName}");
                 dependencyToUpdate.Attribute("Version").Value = newVersion.ToString();
             }
+
+            var packageDownloadList = packagesNodes.Elements("PackageDownload")
+                .Where(x =>
+                    (x.Attributes("Include").Any(a => a.Value.Equals(currentPackage.Id, StringComparison.InvariantCultureIgnoreCase))
+                  || x.Attributes("Update").Any(a => a.Value.Equals(currentPackage.Id, StringComparison.InvariantCultureIgnoreCase))));
+
+            foreach (var dependencyToUpdate in packageDownloadList)
+            {
+                _logger.Detailed(
+                    $"Updating directory-level dependencies: {currentPackage.Id} in path {currentPackage.Path.FullName}");
+                dependencyToUpdate.Attribute("Version").Value = $"[{newVersion}]";
+            }
+
+            var sdkNodeList = sdkNodes
+                .Where(x => x.Attributes("Name").Any(a => a.Value.Equals(currentPackage.Id, StringComparison.InvariantCultureIgnoreCase)));
 
             foreach (var dependencyToUpdate in sdkNodeList)
             {

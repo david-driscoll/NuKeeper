@@ -78,6 +78,7 @@ namespace NuKeeper.Inspection.RepositoryInspection
 
             var itemGroupNodes = project.Elements("ItemGroup");
             var packageNodeList = itemGroupNodes.Elements("PackageReference")
+                .Concat(itemGroupNodes.Elements("PackageDownload"))
                 .Concat(itemGroupNodes.Elements("GlobalPackageReference"));
 
             results.AddRange(packageNodeList
@@ -94,7 +95,7 @@ namespace NuKeeper.Inspection.RepositoryInspection
             {
                 id = el.Attribute("Update")?.Value;
             }
-            var version = el.Attribute("Version")?.Value ?? el.Element("Version")?.Value;
+            var version = (el.Attribute("Version")?.Value ?? el.Element("Version")?.Value)?.Trim('[', ']');
 
             return _packageInProjectReader.Read(id, version, path, null);
         }
@@ -102,7 +103,7 @@ namespace NuKeeper.Inspection.RepositoryInspection
         private PackageInProject XmlToSdk(XElement el, PackagePath path)
         {
             var id = el.Attribute("Name")?.Value;
-            var version = el.Attribute("Version")?.Value ?? el.Element("Version")?.Value;
+            var version = (el.Attribute("Version")?.Value ?? el.Element("Version")?.Value)?.Trim('[', ']');
 
             return _packageInProjectReader.Read(id, version, path, null);
         }

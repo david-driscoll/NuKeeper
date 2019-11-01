@@ -81,7 +81,9 @@ namespace NuKeeper.Inspection.RepositoryInspection
                 .Select(el => MakeProjectPath(el, path.FullName))
                 .ToList();
 
-            var packageRefs = itemGroups.SelectMany(ig => ig.Elements(ns + "PackageReference"));
+            var packageRefs = itemGroups
+                .SelectMany(ig => ig.Elements(ns + "PackageReference"))
+                .Concat(itemGroups.SelectMany(ig => ig.Elements(ns + "PackageDownload")));
             var globalPackageRefs = itemGroups.SelectMany(ig => ig.Elements(ns + "GlobalPackageReference"));
 
             results.AddRange(packageRefs
@@ -131,7 +133,7 @@ namespace NuKeeper.Inspection.RepositoryInspection
             PackagePath path, IEnumerable<string> projectReferences)
         {
             var id = el.Attribute("Include")?.Value;
-            var version = el.Attribute("Version")?.Value ?? el.Element(ns + "Version")?.Value;
+            var version = (el.Attribute("Version")?.Value ?? el.Element(ns + "Version")?.Value)?.Trim('[', ']');
 
             return _packageInProjectReader.Read(id, version, path, projectReferences);
         }
